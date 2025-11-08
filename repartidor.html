@@ -15,7 +15,7 @@
   <!-- Top Bar -->
   <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-xl sm:text-2xl font-bold text-indigo-700">Panel del Repartidor · LogiEntregas</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-indigo-700">Panel del Repartidor</h1>
       <div class="flex gap-2 w-full sm:w-auto">
         <button id="btnRefresh"
                 class="w-full sm:w-auto px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[.99] transition">
@@ -306,17 +306,29 @@
       if (!data || !data.length) { qs("emptyMios").classList.remove("hidden"); return; }
       qs("emptyMios").classList.add("hidden");
 
-      data.forEach(p => {
-        const btnEnRuta = p.estado_pedido === 'EN_RUTA' ? '' : `<button class='px-3 py-3 bg-slate-100 rounded-xl text-sm' onclick="marcarEnRuta('${p.id}')">En ruta</button>`;
+      
+data.forEach(p => {
+  // Acciones visibles por estado
+  let acciones = `
+    <button class='px-3 py-3 bg-indigo-50 text-indigo-700 border rounded-xl text-sm' onclick="verRuta('${p.id}')">Ver ruta</button>
+  `;
 
-        cont.insertAdjacentHTML('beforeend', cardPedido(p, `
-          ${btnEnRuta}
-          <button class='px-3 py-3 bg-green-600 text-white rounded-xl text-sm' onclick="abrirNota('${p.id}','ENTREGADO')">Entregado</button>
-          <button class='px-3 py-3 bg-rose-600 text-white rounded-xl text-sm'  onclick="abrirNota('${p.id}','NO_ENTREGADO')">No entregado</button>
-          <button class='px-3 py-3 bg-indigo-50 text-indigo-700 border rounded-xl text-sm' onclick="verRuta('${p.id}')">Ver ruta</button>
-        `));
-      });
+  if (p.estado_pedido !== 'ENTREGADO') {
+    // Si no está ya EN_RUTA ni marcado NO_ENTREGADO, se puede poner EN_RUTA
+    if (p.estado_pedido !== 'EN_RUTA' && p.estado_pedido !== 'NO_ENTREGADO') {
+      acciones += `<button class='px-3 py-3 bg-slate-100 rounded-xl text-sm' onclick="marcarEnRuta('${p.id}')">En ruta</button>`;
     }
+    // Si no está NO_ENTREGADO, se puede marcar como ENTREGADO
+    if (p.estado_pedido !== 'NO_ENTREGADO') {
+      acciones += `<button class='px-3 py-3 bg-green-600 text-white rounded-xl text-sm' onclick="abrirNota('${p.id}','ENTREGADO')">Entregado</button>`;
+    }
+    // Permitimos registrar "No entregado" mientras no esté finalizado
+    acciones += `<button class='px-3 py-3 bg-rose-600 text-white rounded-xl text-sm' onclick="abrirNota('${p.id}','NO_ENTREGADO')">No entregado</button>`;
+  }
+
+  cont.insertAdjacentHTML('beforeend', cardPedido(p, acciones));
+});
+}
 
     // ====== Acciones ======
     function verRutaDisponible(id){

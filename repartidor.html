@@ -15,7 +15,7 @@
   <!-- Top Bar -->
   <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <h1 class="text-xl sm:text-2xl font-bold text-indigo-700">Panel del Repartidor . LogiEntregas</h1>
+      <h1 class="text-xl sm:text-2xl font-bold text-indigo-700">Panel del Repartidor</h1>
       <div class="flex gap-2 w-full sm:w-auto">
         <button id="btnRefresh"
                 class="w-full sm:w-auto px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[.99] transition">
@@ -118,8 +118,8 @@
         <div class="text-sm text-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div><span class="font-medium">Cliente:</span> <span id="rmCliente">—</span></div>
           <div class="sm:col-span-2"><span class="font-medium">Destino:</span> <span id="rmDestino">—</span></div>
-  <div><span class="font-medium">Fecha:</span> <span id="rmFecha">—</span></div>
-  <div><span class="font-medium">Hora:</span> <span id="rmHora">—</span></div>
+          <div><span class="font-medium">Fecha:</span> <span id="rmFecha">—</span></div>
+          <div><span class="font-medium">Hora:</span> <span id="rmHora">—</span></div>
           <div id="rmOrigenWrap" class="hidden sm:col-span-3"><span class="font-medium">Origen:</span> <span id="rmOrigen">Mi ubicación</span></div>
         </div>
 
@@ -147,6 +147,39 @@
     </div>
   </div>
 
+  <!-- Modal: Capturar comentario (para ENTREGADO / NO_ENTREGADO) -->
+  <div id="notaModal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
+      <div class="px-4 py-3 border-b flex items-center justify-between">
+        <h3 id="nmTitulo" class="font-semibold text-slate-800">Agregar comentario</h3>
+        <button onclick="closeNotaModal()" class="text-slate-500 hover:text-slate-700 text-lg">✕</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <p class="text-sm text-slate-600">Escribe un breve comentario para el estado <b id="nmEstado">—</b>.</p>
+        <textarea id="nmTexto" rows="4" class="w-full border rounded-xl p-3" placeholder="Ej.: Entregado al titular sin novedad / Cliente no localizado..."></textarea>
+        <div class="flex justify-end gap-2 pt-2">
+          <button onclick="closeNotaModal()" class="px-4 py-2 rounded-xl bg-slate-100">Cancelar</button>
+          <button id="nmGuardar" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Ver historial de comentarios -->
+  <div id="histModal" class="hidden fixed inset-0 z-[60] bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
+      <div class="px-4 py-3 border-b flex items-center justify-between">
+        <h3 class="font-semibold text-slate-800">Comentarios del pedido <span id="hmId">#</span></h3>
+        <button onclick="closeHistModal()" class="text-slate-500 hover:text-slate-700 text-lg">✕</button>
+      </div>
+      <div class="p-0 max-h-[70vh] overflow-y-auto">
+        <ul id="hmLista" class="divide-y">
+          <!-- items dinámicos -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -161,10 +194,9 @@
     let disponiblesCache = [];
     const qs = (id) => document.getElementById(id);
 
-  // === Helpers de fecha/hora ===
-  function fmtDate(s){ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleDateString(); }catch(e){ return '—'; } }
-  function fmtTime(s){ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; } }
-
+    // === Helpers de fecha/hora ===
+    const fmtDate = (s)=>{ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleDateString(); }catch(e){ return '—'; } }
+    const fmtTime = (s)=>{ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; } }
 
     // ====== Repartidores ======
     async function cargarRepartidores(){
@@ -192,7 +224,7 @@
 
     function aplicarRepartidorSeleccionado(){
       const id = qs("repSelect").value;
-      repartidorSel = repartidoresCache.find(r => r.id === id) || null;
+      repartidorSel = repartidoresCache.find(r => String(r.id) === String(id)) || null;
 
       qs("repNombre").value  = repartidorSel?.nombre || "";
       qs("repCelular").value = repartidorSel?.celular || "";
@@ -214,11 +246,13 @@
             <div><b>Empresa:</b> ${p.empresa_solicitante || "—"}</div>
             <div><b>Cliente:</b> ${p.nombre_cliente || "—"}</div>
             <div><b>Dirección:</b> ${p.direccion_entrega || "—"}</div>
-            <div><b>Paquetes:</b> ${p.cantidad_paquetes} ${fragil}</div>
+            <div><b>Paquetes:</b> ${p.cantidad_paquetes ?? "—"} ${fragil}</div>
             <div><b>Celular:</b> ${p.numero_celular ? `<a href="tel:${p.numero_celular}" class="text-indigo-700 underline">${p.numero_celular}</a>` : "—"}</div>
             <div><b>Creado:</b> ${fmtDate(p.creado_en)} · ${fmtTime(p.creado_en)}</div>
           </div>
-          <div class="mt-3 grid grid-cols-2 sm:flex sm:flex-row gap-2">${accionesHTML}</div>
+          <div class="mt-3 grid grid-cols-2 sm:flex sm:flex-row gap-2">${accionesHTML}
+            <button class='px-3 py-3 bg-slate-100 rounded-xl text-sm' onclick="abrirHistorial('${p.id}')">Comentarios</button>
+          </div>
         </div>
       `;
     }
@@ -273,13 +307,12 @@
       qs("emptyMios").classList.add("hidden");
 
       data.forEach(p => {
-        // Ocultar botón "En ruta" si ya está en ruta (lógica pedida)
         const btnEnRuta = p.estado_pedido === 'EN_RUTA' ? '' : `<button class='px-3 py-3 bg-slate-100 rounded-xl text-sm' onclick="marcarEnRuta('${p.id}')">En ruta</button>`;
 
         cont.insertAdjacentHTML('beforeend', cardPedido(p, `
           ${btnEnRuta}
-          <button class='px-3 py-3 bg-green-600 text-white rounded-xl text-sm' onclick="marcarEntregado('${p.id}')">Entregado</button>
-          <button class='px-3 py-3 bg-rose-600 text-white rounded-xl text-sm' onclick="marcarNoEntregado('${p.id}')">No entregado</button>
+          <button class='px-3 py-3 bg-green-600 text-white rounded-xl text-sm' onclick="abrirNota('${p.id}','ENTREGADO')">Entregado</button>
+          <button class='px-3 py-3 bg-rose-600 text-white rounded-xl text-sm'  onclick="abrirNota('${p.id}','NO_ENTREGADO')">No entregado</button>
           <button class='px-3 py-3 bg-indigo-50 text-indigo-700 border rounded-xl text-sm' onclick="verRuta('${p.id}')">Ver ruta</button>
         `));
       });
@@ -287,13 +320,13 @@
 
     // ====== Acciones ======
     function verRutaDisponible(id){
-      const p = disponiblesCache.find(x => x.id === id);
+      const p = disponiblesCache.find(x => String(x.id) === String(id));
       if (p) showRouteModal(p);
     }
 
     async function tomarPedido(id){
       if (!repartidorSel) return alert("Selecciona un repartidor");
-      const p = disponiblesCache.find(x => x.id === id);
+      const p = disponiblesCache.find(x => String(x.id) === String(id));
       await supabaseClient.from('deliveries_demo')
         .update({ repartidor_id: repartidorSel.id, estado_pedido: 'EN_RUTA' })
         .eq('id', id);
@@ -305,24 +338,91 @@
       await supabaseClient.from('deliveries_demo').update({estado_pedido:'EN_RUTA'}).eq('id',id);
       await cargarMios();
     }
-    async function marcarEntregado(id){
-      await supabaseClient.from('deliveries_demo').update({estado_pedido:'ENTREGADO',hora_entrega:new Date().toISOString()}).eq('id',id);
-      // No se muestran si el filtro no es ENTREGADO/TODOS
-      await cargarMios();
+
+    // ====== Modal de NOTA (captura) ======
+    let notaDeliveryId = null;
+    let notaEstado = null;
+
+    function abrirNota(id, estado){
+      notaDeliveryId = id;
+      notaEstado = estado;
+      qs('nmEstado').textContent = estado;
+      qs('nmTexto').value = '';
+      qs('nmTitulo').textContent = (estado === 'ENTREGADO') ? 'Comentario de entrega' : 'Motivo de no entregado';
+      qs('notaModal').classList.remove('hidden');
+      setTimeout(()=>qs('nmTexto').focus(), 50);
     }
-    async function marcarNoEntregado(id){
-      await supabaseClient.from('deliveries_demo').update({estado_pedido:'NO_ENTREGADO'}).eq('id',id);
-      await cargarMios();
+    function closeNotaModal(){
+      qs('notaModal').classList.add('hidden');
+      notaDeliveryId = null;
+      notaEstado = null;
     }
 
-    async function verRuta(id){
-      const { data } = await supabaseClient.from('deliveries_demo').select('*').eq('id', id).single();
-      showRouteModal(data);
+    qs('nmGuardar').addEventListener('click', async ()=>{
+      const texto = (qs('nmTexto').value || '').trim();
+      if (!texto){ alert('El comentario es obligatorio.'); return; }
+      if (!notaDeliveryId || !notaEstado){ closeNotaModal(); return; }
+
+      // 1) Actualiza estado del pedido
+      const patch = { estado_pedido: notaEstado };
+      if (notaEstado === 'ENTREGADO') patch.hora_entrega = new Date().toISOString();
+      const { error: upErr } = await supabaseClient.from('deliveries_demo').update(patch).eq('id', notaDeliveryId);
+      if (upErr){ alert('Error al actualizar el pedido'); console.error(upErr); return; }
+
+      // 2) Inserta nota
+      const { error: inErr } = await supabaseClient.from('delivery_notas').insert({
+        delivery_id: notaDeliveryId,
+        estado: notaEstado,
+        comentario: texto
+      });
+      if (inErr){ alert('Error al guardar el comentario'); console.error(inErr); return; }
+
+      closeNotaModal();
+      await cargarMios();
+    });
+
+    // ====== Modal de HISTORIAL ======
+    async function abrirHistorial(id){
+      qs('hmId').textContent = id;
+      const ul = qs('hmLista');
+      ul.innerHTML = `<li class="p-4 text-sm text-slate-500">Cargando…</li>`;
+
+      const { data, error } = await supabaseClient
+        .from('delivery_notas')
+        .select('estado, comentario, creado_en')
+        .eq('delivery_id', id)
+        .order('creado_en', { ascending: false });
+
+      if (error){
+        ul.innerHTML = `<li class="p-4 text-sm text-rose-600">Error al cargar comentarios.</li>`;
+        console.error(error);
+      } else if (!data || !data.length){
+        ul.innerHTML = `<li class="p-4 text-sm text-slate-500">Sin comentarios.</li>`;
+      } else {
+        ul.innerHTML = data.map(r=>{
+          const f = fmtDate(r.creado_en);
+          const h = fmtTime(r.creado_en);
+          const badge = (r.estado === 'ENTREGADO')
+            ? '<span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">ENTREGADO</span>'
+            : (r.estado === 'NO_ENTREGADO')
+              ? '<span class="px-2 py-0.5 rounded-full text-xs bg-rose-100 text-rose-700">NO ENTREGADO</span>'
+              : `<span class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-700">${r.estado||'—'}</span>`;
+          return `
+            <li class="p-4 text-sm">
+              <div class="flex items-center justify-between">
+                ${badge}
+                <span class="text-xs text-slate-500">${f} · ${h}</span>
+              </div>
+              <p class="mt-1 text-slate-800">${(r.comentario||'').replace(/</g,'&lt;')}</p>
+            </li>`;
+        }).join('');
+      }
+      qs('histModal').classList.remove('hidden');
     }
+    function closeHistModal(){ qs('histModal').classList.add('hidden'); }
 
     // ====== Modal de rutas ======
     function closeRouteModal(){ qs('routeModal').classList.add('hidden'); }
-
     function showRouteModal(p){
       const d = p.direccion_entrega;
       qs('rmCliente').textContent = p.nombre_cliente || "—";

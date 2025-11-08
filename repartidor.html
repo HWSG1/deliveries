@@ -14,47 +14,60 @@
 <body class="min-h-screen bg-slate-50">
   <!-- Top Bar -->
   <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
-    <div class="max-w-4xl mx-auto px-4 py-3">
-      <div class="flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <a href="./index.html" class="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 font-bold">S</a>
-          <div>
-            <h1 class="text-lg sm:text-xl font-bold text-slate-800">Repartidor</h1>
-            <p class="text-xs text-slate-500 -mt-0.5">Panel de asignación y rutas</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <a href="./empresa.html" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm">Empresa</a>
-          <a href="./tracking_cliente.html" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm">Tracking cliente</a>
-        </div>
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <h1 class="text-xl sm:text-2xl font-bold text-indigo-700">Panel del Repartidor</h1>
+      <div class="flex gap-2 w-full sm:w-auto">
+        <button id="btnRefresh"
+                class="w-full sm:w-auto px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[.99] transition">
+          Actualizar
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="max-w-4xl mx-auto px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-
-    <!-- Filtros / Header -->
+  <main class="max-w-5xl mx-auto px-4 pt-4 pb-24 safe-bottom space-y-5">
+    <!-- Mi información -->
     <section class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-slate-200">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-slate-600">Repartidor:</span>
-          <select id="selRepartidor" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm"></select>
+      <h2 class="text-base sm:text-lg font-semibold text-slate-800 mb-3">Mi información</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+        <div class="sm:col-span-3">
+          <label class="block text-sm font-medium text-slate-700 mb-1">Seleccionar repartidor</label>
+          <select id="repSelect" class="w-full px-3 py-3 border rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">— Elegir —</option>
+          </select>
         </div>
-        <div class="flex items-center gap-2">
-          <button id="btnTabDisponibles" class="px-3 py-2 rounded-xl text-sm bg-indigo-50 text-indigo-700 border border-indigo-100">Pedidos disponibles</button>
-          <button id="btnTabMisPedidos" class="px-3 py-2 rounded-xl text-sm bg-slate-100 hover:bg-slate-200">Mis pedidos</button>
+
+        <div class="flex">
+          <button id="btnCargarRepartidores"
+            class="w-full px-4 py-3 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 active:scale-[.99] transition font-medium">
+            Recargar 🔄
+          </button>
+        </div>
+      </div>
+
+      <div id="repInfo" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+          <input id="repNombre" class="w-full px-3 py-3 border rounded-xl bg-slate-50" readonly />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Celular</label>
+          <input id="repCelular" class="w-full px-3 py-3 border rounded-xl bg-slate-50" readonly />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Placa</label>
+          <input id="repPlaca" class="w-full px-3 py-3 border rounded-xl bg-slate-50" readonly />
         </div>
       </div>
     </section>
 
-    <!-- Disponibles -->
-    <section id="tabDisponibles" class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-slate-200">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+    <!-- Pedidos disponibles -->
+    <section class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-slate-200">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
         <h2 class="text-base sm:text-lg font-semibold text-slate-800">Pedidos disponibles</h2>
         <div class="flex w-full sm:w-auto gap-2">
-          <input id="fEmpresa" class="flex-1 min-w-0 px-3 py-3 border border-slate-200 rounded-xl" placeholder="Filtrar por empresa (opcional)" />
+          <input id="fEmpresa" class="flex-1 min-w-0 px-3 py-3 border rounded-xl" placeholder="Filtrar por empresa (opcional)" />
           <button id="btnBuscarDisponibles" class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-[.99]">
             Buscar
           </button>
@@ -68,69 +81,78 @@
     <section class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-slate-200">
       <div class="flex items-center justify-between mb-3 gap-2">
         <h2 class="text-base sm:text-lg font-semibold text-slate-800">Mis pedidos</h2>
+        <!-- Filtro de estado -->
         <div class="flex items-center gap-2">
-          <div class="text-xs text-slate-500">Estado:</div>
-          <select id="selEstadoMisPedidos" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm">
-            <option value="">Todos</option>
-            <option value="ASIGNADO">ASIGNADO</option>
-            <option value="EN RUTA">EN RUTA</option>
-            <option value="ENTREGADO">ENTREGADO</option>
+          <label for="estadoFiltro" class="text-sm text-slate-600">Estado:</label>
+          <select id="estadoFiltro" class="px-3 py-2 border rounded-lg bg-white text-sm">
+            <option value="EN_RUTA" selected>En ruta</option>
+            <option value="ENTREGADO">Entregados</option>
+            <option value="NO_ENTREGADO">No entregados</option>
+            <option value="TODOS">Todos</option>
           </select>
-          <button id="btnRefresh"
-                  class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm">Actualizar</button>
+          <button id="btnBuscarMios" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 active:scale-[.99]">Buscar</button>
         </div>
       </div>
-      <div id="listaMisPedidos" class="space-y-3"></div>
-      <p id="emptyMisPedidos" class="text-sm text-slate-500 hidden">No tienes pedidos asignados.</p>
+      <div id="listaMios" class="space-y-3"></div>
+      <p id="emptyMios" class="text-sm text-slate-500 hidden">No tienes pedidos para este estado.</p>
     </section>
-
   </main>
 
-  <!-- Modal RUTA -->
-  <div id="routeModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] hidden">
-    <div class="absolute inset-0 flex items-end sm:items-center justify-center">
-      <div class="w-full sm:w-[680px] bg-white rounded-t-2xl sm:rounded-2xl sm:shadow-xl overflow-hidden h-[92vh] sm:h-auto">
-        <div class="px-4 sm:px-5 py-4 border-b flex items-center justify-between">
-          <h3 class="text-base sm:text-lg font-semibold text-slate-800">Ruta recomendada</h3>
-          <button class="text-slate-500 hover:text-slate-700 text-lg" onclick="closeRouteModal()">✕</button>
+  <!-- Sticky Action Bar -->
+  <footer class="fixed bottom-0 left-0 right-0 z-20 bg-white/95 backdrop-blur border-t border-slate-200 px-4 py-3 sm:hidden">
+    <div class="max-w-5xl mx-auto grid grid-cols-2 gap-2">
+      <button id="fabDisponibles" class="px-4 py-3 rounded-xl bg-indigo-600 text-white font-medium">Disponibles</button>
+      <button id="fabMios" class="px-4 py-3 rounded-xl bg-slate-900 text-white font-medium">Mis pedidos</button>
+    </div>
+  </footer>
+
+  <!-- Modal Rutas -->
+  <div id="routeModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full sm:max-w-3xl sm:rounded-2xl sm:shadow-xl overflow-hidden h-[92vh] sm:h-auto">
+      <div class="px-4 sm:px-5 py-4 border-b flex items-center justify-between">
+        <h3 class="text-base sm:text-lg font-semibold text-slate-800">Ruta recomendada</h3>
+        <button class="text-slate-500 hover:text-slate-700 text-lg" onclick="closeRouteModal()">✕</button>
+      </div>
+
+      <div class="p-4 sm:p-5 space-y-4 h-[calc(92vh-64px)] sm:h-auto overflow-y-auto">
+        <div class="text-sm text-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div><span class="font-medium">Cliente:</span> <span id="rmCliente">—</span></div>
+          <div class="sm:col-span-2"><span class="font-medium">Destino:</span> <span id="rmDestino">—</span></div>
+  <div><span class="font-medium">Fecha:</span> <span id="rmFecha">—</span></div>
+  <div><span class="font-medium">Hora:</span> <span id="rmHora">—</span></div>
+          <div id="rmOrigenWrap" class="hidden sm:col-span-3"><span class="font-medium">Origen:</span> <span id="rmOrigen">Mi ubicación</span></div>
         </div>
 
-        <div class="p-4 sm:p-5 space-y-4 h-[calc(92vh-64px)] sm:h-auto overflow-y-auto">
-          <div class="text-sm text-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div><span class="font-medium">Cliente:</span> <span id="rmCliente">—</span></div>
-            <div class="sm:col-span-2"><span class="font-medium">Destino:</span> <span id="rmDestino">—</span></div>
-            <div><span class="font-medium">Fecha:</span> <span id="rmFecha">—</span></div>
-            <div><span class="font-medium">Hora:</span> <span id="rmHora">—</span></div>
-            <div id="rmOrigenWrap" class="hidden sm:col-span-3"><span class="font-medium">Origen:</span> <span id="rmOrigen">Mi ubicación</span></div>
-          </div>
-
-          <div class="rounded-xl border overflow-hidden">
-            <iframe id="rmMap"
-                    src=""
-                    width="100%" height="360" style="border:0;"
-                    loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-
-          <div class="flex gap-2">
-            <a id="btnOpenGmaps" href="#" target="_blank" class="flex-1 px-4 py-3 rounded-xl bg-indigo-600 text-white text-center">Abrir en Google Maps</a>
-            <a id="btnOpenWaze" href="#" target="_blank" class="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-white text-center">Abrir en Waze</a>
-            <button class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200" onclick="closeRouteModal()">Cerrar</button>
-          </div>
-
-          <p class="text-xs text-slate-500">
-            Si no otorgas permiso de ubicación, la ruta usará tu ubicación por defecto del mapa.
-          </p>
+        <div class="rounded-xl border overflow-hidden">
+          <iframe id="rmMap"
+                  src=""
+                  width="100%" height="360" style="border:0;"
+                  loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
         </div>
+
+        <div class="grid grid-cols-1 sm:flex sm:flex-row gap-3">
+          <a id="btnOpenGmaps" target="_blank"
+             class="px-4 py-3 rounded-xl text-center bg-indigo-600 text-white hover:bg-indigo-700">Abrir en Google Maps</a>
+          <a id="btnOpenWaze" target="_blank"
+             class="px-4 py-3 rounded-xl text-center bg-blue-600 text-white hover:bg-blue-700">Abrir en Waze</a>
+          <button onclick="closeRouteModal()"
+                  class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200">Cerrar</button>
+        </div>
+
+        <p id="rmNote" class="text-xs text-slate-500">
+          Si no otorgas permiso de ubicación, la ruta usará tu ubicación por defecto del mapa.
+        </p>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ====== Config Supabase ======
-    const SUPABASE_URL = "https://krczqimvyjvntwivwfzp.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyY3pxaW12eWp2bnR3aXZ3ZnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5OTc2NzksImV4cCI6MjAxNTU3MzY3OX0.4w95kN7X0rKbaqKkM7Kz8mAqR5fYjKfMS3K8d2pNfN0";
+    // ====== Supabase config ======
+    const SUPABASE_URL = "https://drtmkssrhboxiuctdrmm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRydG1rc3NyaGJveGl1Y3Rkcm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwNDI4MDEsImV4cCI6MjA3NzYxODgwMX0.nniveMQIfW8iCh0-JnuWyZy4uklWNMQvAoF_RDwVvCY";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ====== State ======
@@ -139,24 +161,47 @@
     let disponiblesCache = [];
     const qs = (id) => document.getElementById(id);
 
-    // === Helpers de fecha/hora ===
-    function fmtDate(s){ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleDateString(); }catch(e){ return '—'; } }
-    function fmtTime(s){ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; } }
+  // === Helpers de fecha/hora ===
+  function fmtDate(s){ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleDateString(); }catch(e){ return '—'; } }
+  function fmtTime(s){ try{ if(!s) return '—'; const d=new Date(s); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }catch(e){ return '—'; } }
+
 
     // ====== Repartidores ======
     async function cargarRepartidores(){
       const { data, error } = await supabaseClient
-        .from('repartidores_demo')
+        .from('repartidores')
         .select('*')
         .order('nombre', { ascending: true });
-      if (error) { console.error(error); return; }
-      repartidoresCache = data || [];
-      const sel = qs('selRepartidor');
-      sel.innerHTML = (repartidoresCache||[]).map(r=>`<option value="${r.id}">${r.nombre}</option>`).join('');
-      repartidorSel = sel.value ? parseInt(sel.value,10) : null;
+
+      if(error){ console.error(error); alert("Error cargando repartidores"); return; }
+
+      let rows = data || [];
+      const activos = rows.filter(r => r.activo === true);
+      if (activos.length > 0) rows = activos;
+
+      repartidoresCache = rows;
+      const sel = qs("repSelect");
+      sel.innerHTML = `<option value="">— Elegir —</option>`;
+      rows.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = `${r.nombre} • ${r.celular} • ${r.placa}`;
+        sel.appendChild(opt);
+      });
     }
 
-    // Render card de pedido
+    function aplicarRepartidorSeleccionado(){
+      const id = qs("repSelect").value;
+      repartidorSel = repartidoresCache.find(r => r.id === id) || null;
+
+      qs("repNombre").value  = repartidorSel?.nombre || "";
+      qs("repCelular").value = repartidorSel?.celular || "";
+      qs("repPlaca").value   = repartidorSel?.placa || "";
+
+      if (repartidorSel) cargarMios();
+    }
+
+    // ====== Cards ======
     function cardPedido(p, accionesHTML){
       const fragil = p.es_fragil ? `<span class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Frágil</span>` : "";
       return `
@@ -190,91 +235,94 @@
 
       if (f) query = query.ilike('empresa_solicitante', `%${f}%`);
       const { data, error } = await query;
-      if (error) { console.error(error); return; }
+      if(error){ console.error(error); return alert("Error listando pedidos"); }
       disponiblesCache = data || [];
-      renderDisponibles();
-    }
 
-    function renderDisponibles(){
-      const cont = qs('listaDisponibles');
-      cont.innerHTML = '';
-      if (!disponiblesCache?.length){
-        qs('emptyDisponibles').classList.remove('hidden');
-        return;
-      }
-      qs('emptyDisponibles').classList.add('hidden');
+      const cont = qs("listaDisponibles");
+      cont.innerHTML = "";
+      if (!data || !data.length) { qs("emptyDisponibles").classList.remove("hidden"); return; }
+      qs("emptyDisponibles").classList.add("hidden");
 
-      cont.innerHTML = disponiblesCache.map(p=>{
-        const acciones = `
-          <a href="javascript:void(0)" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm"
-             onclick='showRouteModal(${JSON.stringifyForHtml ? JSON.stringifyForHtml(p) : JSON.stringify(p)})'>Ver ruta</a>
-          <button class="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm"
-             onclick="tomarPedido(${p.id})">Tomar pedido</button>`;
-        return cardPedido(p, acciones);
-      }).join('');
+      data.forEach(p => {
+        cont.insertAdjacentHTML('beforeend', cardPedido(p, `
+          <button class='px-3 py-3 bg-indigo-50 text-indigo-700 border rounded-xl text-sm' onclick="verRutaDisponible('${p.id}')">Ver ruta</button>
+          <button class='px-3 py-3 bg-indigo-600 text-white rounded-xl text-sm' onclick="tomarPedido('${p.id}')">Tomar pedido</button>
+        `));
+      });
     }
 
     // ====== Mis pedidos ======
-    async function cargarMisPedidos(){
-      const estado = qs('selEstadoMisPedidos').value;
-      let q = supabaseClient
+    async function cargarMios(){
+      if (!repartidorSel) return;
+      const estado = qs("estadoFiltro").value;
+
+      let query = supabaseClient
         .from('deliveries_demo')
         .select('*')
-        .eq('repartidor_id', repartidorSel)
+        .eq('repartidor_id', repartidorSel.id)
         .order('creado_en', { ascending: false });
 
-      if (estado) q = q.eq('estado_pedido', estado);
+      if (estado !== "TODOS") query = query.eq('estado_pedido', estado);
 
-      const { data, error } = await q;
+      const { data, error } = await query;
       if (error) { console.error(error); return; }
-      const pedidos = data || [];
-      const cont = qs('listaMisPedidos');
-      cont.innerHTML = '';
-      if (!pedidos.length){
-        qs('emptyMisPedidos').classList.remove('hidden');
-        return;
-      }
-      qs('emptyMisPedidos').classList.add('hidden');
 
-      cont.innerHTML = pedidos.map(p=>{
-        const acciones = `
-          <a href="javascript:void(0)" class="px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm"
-             onclick='showRouteModal(${JSON.stringifyForHtml ? JSON.stringifyForHtml(p) : JSON.stringify(p)})'>Ver ruta</a>
-          <button class="px-3 py-2 rounded-lg bg-indigo-600 text-white text-sm"
-             onclick="marcarEnRuta(${p.id})">Marcar EN RUTA</button>
-          <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm"
-             onclick="marcarEntregado(${p.id})">Marcar ENTREGADO</button>`;
-        return cardPedido(p, acciones);
-      }).join('');
+      const cont = qs("listaMios");
+      cont.innerHTML = "";
+      if (!data || !data.length) { qs("emptyMios").classList.remove("hidden"); return; }
+      qs("emptyMios").classList.add("hidden");
+
+      data.forEach(p => {
+        // Ocultar botón "En ruta" si ya está en ruta (lógica pedida)
+        const btnEnRuta = p.estado_pedido === 'EN_RUTA' ? '' : `<button class='px-3 py-3 bg-slate-100 rounded-xl text-sm' onclick="marcarEnRuta('${p.id}')">En ruta</button>`;
+
+        cont.insertAdjacentHTML('beforeend', cardPedido(p, `
+          ${btnEnRuta}
+          <button class='px-3 py-3 bg-green-600 text-white rounded-xl text-sm' onclick="marcarEntregado('${p.id}')">Entregado</button>
+          <button class='px-3 py-3 bg-rose-600 text-white rounded-xl text-sm' onclick="marcarNoEntregado('${p.id}')">No entregado</button>
+          <button class='px-3 py-3 bg-indigo-50 text-indigo-700 border rounded-xl text-sm' onclick="verRuta('${p.id}')">Ver ruta</button>
+        `));
+      });
     }
 
     // ====== Acciones ======
+    function verRutaDisponible(id){
+      const p = disponiblesCache.find(x => x.id === id);
+      if (p) showRouteModal(p);
+    }
+
     async function tomarPedido(id){
-      if (!repartidorSel) return alert('Seleccione un repartidor');
-      const { error } = await supabaseClient
-        .from('deliveries_demo')
-        .update({ repartidor_id: repartidorSel, estado_pedido: 'ASIGNADO' })
+      if (!repartidorSel) return alert("Selecciona un repartidor");
+      const p = disponiblesCache.find(x => x.id === id);
+      await supabaseClient.from('deliveries_demo')
+        .update({ repartidor_id: repartidorSel.id, estado_pedido: 'EN_RUTA' })
         .eq('id', id);
-      if (error) return alert('Error al tomar pedido');
-      await cargarDisponibles();
-      await cargarMisPedidos();
+      await cargarDisponibles(); await cargarMios();
+      if (p) showRouteModal(p);
     }
 
     async function marcarEnRuta(id){
-      const { error } = await supabaseClient
-        .from('deliveries_demo').update({ estado_pedido: 'EN RUTA' }).eq('id', id);
-      if (error) return alert('Error');
-      await cargarMisPedidos();
+      await supabaseClient.from('deliveries_demo').update({estado_pedido:'EN_RUTA'}).eq('id',id);
+      await cargarMios();
     }
-
     async function marcarEntregado(id){
-      const { error } = await supabaseClient
-        .from('deliveries_demo').update({ estado_pedido: 'ENTREGADO' }).eq('id', id);
-      if (error) return alert('Error');
-      await cargarMisPedidos();
+      await supabaseClient.from('deliveries_demo').update({estado_pedido:'ENTREGADO',hora_entrega:new Date().toISOString()}).eq('id',id);
+      // No se muestran si el filtro no es ENTREGADO/TODOS
+      await cargarMios();
+    }
+    async function marcarNoEntregado(id){
+      await supabaseClient.from('deliveries_demo').update({estado_pedido:'NO_ENTREGADO'}).eq('id',id);
+      await cargarMios();
     }
 
-    // ====== Modal ======
+    async function verRuta(id){
+      const { data } = await supabaseClient.from('deliveries_demo').select('*').eq('id', id).single();
+      showRouteModal(data);
+    }
+
+    // ====== Modal de rutas ======
+    function closeRouteModal(){ qs('routeModal').classList.add('hidden'); }
+
     function showRouteModal(p){
       const d = p.direccion_entrega;
       qs('rmCliente').textContent = p.nombre_cliente || "—";
@@ -294,42 +342,28 @@
           qs('btnOpenGmaps').href = gm; qs('btnOpenWaze').href = wz;
         },()=>{qs('btnOpenGmaps').href=gm;qs('btnOpenWaze').href=wz;},{enableHighAccuracy:true,timeout:5000});
       } else { qs('btnOpenGmaps').href=gm; qs('btnOpenWaze').href=wz; }
-      document.getElementById('routeModal').classList.remove('hidden');
-    }
-    function closeRouteModal(){
-      document.getElementById('routeModal').classList.add('hidden');
-      qs('rmMap').src = '';
-      qs('rmOrigenWrap').classList.add('hidden');
+      qs('routeModal').classList.remove('hidden');
     }
 
-    // ====== Tabs y eventos ======
-    document.getElementById('btnTabDisponibles').addEventListener('click',()=>{
-      document.getElementById('tabDisponibles').classList.remove('hidden');
-    });
-    document.getElementById('btnTabMisPedidos').addEventListener('click',()=>{
-      cargarMisPedidos();
-      document.getElementById('tabDisponibles').classList.add('hidden');
-    });
+    // ====== Events ======
+    qs("btnRefresh").addEventListener("click", ()=>{cargarDisponibles();if(repartidorSel) cargarMios();});
+    qs("btnBuscarDisponibles").addEventListener("click", cargarDisponibles);
+    qs("btnBuscarMios").addEventListener("click", cargarMios);
+    qs("estadoFiltro").addEventListener("change", cargarMios);
+    qs("btnCargarRepartidores").addEventListener("click", cargarRepartidores);
+    qs("repSelect").addEventListener("change", aplicarRepartidorSeleccionado);
 
-    document.getElementById('btnBuscarDisponibles').addEventListener('click', cargarDisponibles);
-    document.getElementById('btnRefresh').addEventListener('click', cargarMisPedidos);
-    document.getElementById('selEstadoMisPedidos').addEventListener('change', cargarMisPedidos);
-    document.getElementById('selRepartidor').addEventListener('change', (e)=> {
-      repartidorSel = parseInt(e.target.value,10);
-      cargarMisPedidos();
+    // Sticky bottom quick-nav
+    qs("fabDisponibles").addEventListener("click", ()=>{
+      document.getElementById("listaDisponibles").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+    qs("fabMios").addEventListener("click", ()=>{
+      document.getElementById("listaMios").scrollIntoView({behavior:"smooth", block:"start"});
     });
 
     // ====== Init ======
-    (async ()=>{
-      await cargarRepartidores();
-      await cargarDisponibles();
-      await cargarMisPedidos();
-    })();
-
-    // Helper para embebido seguro (si existía en tu proyecto)
-    if (!window.JSON.stringifyForHtml) {
-      JSON.stringifyForHtml = (obj)=> JSON.stringify(obj).replace(/</g,"\\u003c");
-    }
+    cargarRepartidores();
+    cargarDisponibles();
   </script>
 </body>
 </html>

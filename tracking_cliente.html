@@ -69,7 +69,7 @@
     <p class="text-center text-xs text-slate-500">* Esta página se actualiza automáticamente.</p>
   </main>
 
-  <!-- Supabase + QR (optional share) -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -88,14 +88,18 @@
     };
 
     function fmtDate(s){ if(!s) return '—'; const d=new Date(s); return d.toLocaleString(); }
+    const esc = (t)=> String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
-    function buildTimeline(estado, creado_en, hora_entrega){
-      const steps=[
-        { key:'NUEVO', label:'Pedido creado', ts: creado_en },
-        { key:'EN_RUTA', label:'En ruta hacia la dirección', ts: null },
-        { key:'ENTREGADO', label:'Entregado', ts: hora_entrega||null }
+    // === NUEVO: agrega 'comment' por estado, usando la nota más reciente si existe ===
+    function buildTimeline(estado, creado_en, hora_entrega, comments){
+      const steps = [
+        { key:'NUEVO',       label:'Pedido creado',             ts: creado_en,                    comment: comments.NUEVO?.comentario || '' },
+        { key:'EN_RUTA',     label:'En ruta hacia la dirección',ts: comments.EN_RUTA?.creado_en || null, comment: comments.EN_RUTA?.comentario || '' },
+        { key:'ENTREGADO',   label:'Entregado',                 ts: hora_entrega || comments.ENTREGADO?.creado_en || null, comment: comments.ENTREGADO?.comentario || '' }
       ];
-      if(estado==='NO_ENTREGADO'){ steps.push({ key:'NO_ENTREGADO', label:'No entregado', ts:null }); }
+      if(estado==='NO_ENTREGADO'){
+        steps.push({ key:'NO_ENTREGADO', label:'No entregado', ts: comments.NO_ENTREGADO?.creado_en || null, comment: comments.NO_ENTREGADO?.comentario || '' });
+      }
       const order=['NUEVO','APROBADO','EN_RUTA','ENTREGADO','NO_ENTREGADO','DEVUELTO'];
       const idx=order.indexOf(estado);
       return steps.map(s=>({ ...s, done: order.indexOf(s.key)!==-1 && order.indexOf(s.key)<=idx && !(estado==='NO_ENTREGADO'&&s.key==='ENTREGADO') }));
@@ -106,11 +110,13 @@
       tl.forEach(s=>{
         const dot=s.done?'bg-green-600':'bg-slate-300';
         const when=s.ts?`<div class="text-xs text-slate-500 mt-1">${fmtDate(s.ts)}</div>`:'';
+        const comment = s.comment ? `<div class="mt-1 text-sm text-slate-700">${esc(s.comment)}</div>` : '';
         el.insertAdjacentHTML('beforeend',`
           <li class="relative">
             <span class="absolute -left-[23px] top-1 h-3 w-3 rounded-full ${dot} ring-2 ring-white"></span>
             <div class="text-sm ${s.done?'text-slate-900 font-medium':'text-slate-600'}">${s.label}</div>
             ${when}
+            ${comment}
           </li>`);
       });
     }
@@ -136,9 +142,12 @@
     let currentId=null, initialLoaded=false;
     async function loadPedido(id){
       if(!id){ if(!initialLoaded){ $('notFound').classList.remove('hidden'); } return; }
+
+      // 1) Pedido
       const { data, error } = await db.from('deliveries_demo').select('*').eq('id',id).maybeSingle();
       if(error||!data){ if(!initialLoaded){ $('notFound').classList.remove('hidden'); } return; }
       initialLoaded=true; $('notFound').classList.add('hidden'); $('cardPedido').classList.remove('hidden');
+
       $('pedidoId').textContent=data.id;
       $('empresa').textContent=data.empresa_solicitante||'—';
       $('cliente').textContent=data.nombre_cliente||'—';
@@ -148,7 +157,32 @@
       $('creado').textContent=fmtDate(data.creado_en);
       if(data.hora_entrega){ $('horaEntregaWrap').classList.remove('hidden'); $('horaEntrega').textContent=fmtDate(data.hora_entrega); }
       setBadge(data.estado_pedido||'—'); setMapLinks(data.direccion_entrega||''); if(data.repartidor_id) loadRepartidor(data.repartidor_id);
-      renderTimeline(buildTimeline(data.estado_pedido||'NUEVO', data.creado_en, data.hora_entrega));
+
+      // 2) Notas de entrega (tomamos la más reciente por estado)
+      const { data: notas } = await db
+        .from('delivery_notas')
+        .select('estado, comentario, creado_en')
+        .eq('delivery_id', id)
+        .order('creado_en', { ascending: false });
+
+      const lastBy = {};
+      (notas||[]).forEach(n => { if(!lastBy[n.estado]) lastBy[n.estado]=n; });
+
+      // 3) Timeline con comentarios
+      renderTimeline(
+        buildTimeline(
+          data.estado_pedido||'NUEVO',
+          data.creado_en,
+          data.hora_entrega,
+          {
+            NUEVO:        lastBy['NUEVO']        || null,
+            EN_RUTA:      lastBy['EN_RUTA']      || null,
+            ENTREGADO:    lastBy['ENTREGADO']    || null,
+            NO_ENTREGADO: lastBy['NO_ENTREGADO'] || null
+          }
+        )
+      );
+
       $('ultimoUpd').textContent='Última actualización: '+fmtDate(new Date());
     }
 

@@ -236,6 +236,12 @@
     // ====== Cards ======
     function cardPedido(p, accionesHTML){
       const fragil = p.es_fragil ? `<span class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Frágil</span>` : "";
+      const peso = p.peso_kg != null ? `${p.peso_kg} kg` : "—";
+      const dimensiones = [p.largo_cm, p.ancho_cm, p.alto_cm].every(v => v != null)
+        ? `${p.largo_cm} × ${p.ancho_cm} × ${p.alto_cm} cm (L × A × Al)`
+        : "—";
+      const vehiculos = { MOTOCICLETA: "Motocicleta", AUTOMOVIL: "Automóvil", CAMION: "Camión" };
+      const vehiculo = vehiculos[p.vehiculo_requerido] || p.vehiculo_requerido || "—";
       return `
         <div class="rounded-xl border p-3 sm:p-4 bg-white">
           <div class="flex items-center justify-between gap-2">
@@ -247,6 +253,9 @@
             <div><b>Cliente:</b> ${p.nombre_cliente || "—"}</div>
             <div><b>Dirección:</b> ${p.direccion_entrega || "—"}</div>
             <div><b>Paquetes:</b> ${p.cantidad_paquetes ?? "—"} ${fragil}</div>
+            <div><b>Peso:</b> ${peso}</div>
+            <div><b>Dimensiones:</b> ${dimensiones}</div>
+            <div><b>Vehículo requerido:</b> ${vehiculo}</div>
             <div><b>Celular:</b> ${p.numero_celular ? `<a href="tel:${p.numero_celular}" class="text-indigo-700 underline">${p.numero_celular}</a>` : "—"}</div>
             <div><b>Creado:</b> ${fmtDate(p.creado_en)} · ${fmtTime(p.creado_en)}</div>
           </div>

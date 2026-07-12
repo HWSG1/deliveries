@@ -37,6 +37,9 @@
           <div><span class="font-medium">Paquetes:</span> <span id="paquetes">—</span>
             <span id="fragil" class="hidden ml-2 text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Frágil</span>
           </div>
+          <div><span class="font-medium">Peso:</span> <span id="peso">—</span></div>
+          <div><span class="font-medium">Dimensiones:</span> <span id="dimensiones">—</span></div>
+          <div><span class="font-medium">Vehículo requerido:</span> <span id="vehiculo">—</span></div>
         </div>
         <div class="space-y-1 text-sm text-slate-700">
           <div><span class="font-medium">Creado:</span> <span id="creado">—</span></div>
@@ -154,6 +157,11 @@
       $('direccion').textContent=data.direccion_entrega||'—';
       $('paquetes').textContent=data.cantidad_paquetes??'—';
       if(data.es_fragil)$('fragil').classList.remove('hidden'); else $('fragil').classList.add('hidden');
+      $('peso').textContent=data.peso_kg!=null?`${data.peso_kg} kg`:'—';
+      $('dimensiones').textContent=[data.largo_cm,data.ancho_cm,data.alto_cm].every(v=>v!=null)
+        ?`${data.largo_cm} × ${data.ancho_cm} × ${data.alto_cm} cm (L × A × Al)`:'—';
+      const vehiculos={MOTOCICLETA:'Motocicleta',AUTOMOVIL:'Automóvil',CAMION:'Camión'};
+      $('vehiculo').textContent=vehiculos[data.vehiculo_requerido]||data.vehiculo_requerido||'—';
       $('creado').textContent=fmtDate(data.creado_en);
       if(data.hora_entrega){ $('horaEntregaWrap').classList.remove('hidden'); $('horaEntrega').textContent=fmtDate(data.hora_entrega); }
       setBadge(data.estado_pedido||'—'); setMapLinks(data.direccion_entrega||''); if(data.repartidor_id) loadRepartidor(data.repartidor_id);
